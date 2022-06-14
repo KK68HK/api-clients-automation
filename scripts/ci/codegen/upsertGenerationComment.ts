@@ -14,13 +14,12 @@ const allowedTriggers = [
   'codegen',
   'noGen',
   'cleanup',
-  'noGenButSHouldHave',
-  'genBuShouldNotHave',
 ] as const;
 
 type Trigger = typeof allowedTriggers[number];
+type ExtraTrigger = Trigger | 'genBuShouldNotHave' | 'noGenButSHouldHave';
 
-export async function getCommentBody(trigger: Trigger): Promise<string> {
+export async function getCommentBody(trigger: ExtraTrigger): Promise<string> {
   let generatedBranch = await run('git branch --show-current');
 
   // `cleanup` is triggered on PR close, which runs on `main`, so we lose the
@@ -58,7 +57,10 @@ async function shouldHaveGeneratedCode(octokit: Octokit): Promise<boolean> {
   return description.includes('- [x] Should generate code');
 }
 
-async function writeComment(trigger: Trigger, octokit: Octokit): Promise<void> {
+async function writeComment(
+  trigger: ExtraTrigger,
+  octokit: Octokit
+): Promise<void> {
   try {
     const baseOctokitConfig = {
       owner: OWNER,
