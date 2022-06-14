@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import type { Octokit } from '@octokit/rest';
+
 import { run, OWNER, REPO, getOctokit } from '../../common';
 
 import commentText from './text';
@@ -12,6 +14,8 @@ const allowedTriggers = [
   'codegen',
   'noGen',
   'cleanup',
+  'noGenButSHouldHave',
+  'genBuShouldNotHave',
 ] as const;
 
 type Trigger = typeof allowedTriggers[number];
@@ -41,27 +45,20 @@ ${commentText[trigger].body(
 )}`;
 }
 
-/**
- * Adds or updates a comment on a pull request.
- */
-export async function upsertGenerationComment(trigger: Trigger): Promise<void> {
-  const octokit = getOctokit();
-  if (!trigger || allowedTriggers.includes(trigger) === false) {
-    throw new Error(
-      `'upsertGenerationComment' requires a 'trigger' parameter (${allowedTriggers.join(
-        ' | '
-      )}).`
-    );
+async function shouldHaveGeneratedCode(octokit: Octokit): Promise<boolean> {
+  const pr = await octokit.rest.pulls.get({
+    owner: OWNER,
+    repo: REPO,
+    pull_number: PR_NUMBER,
+  });
+  const description = pr.data.body;
+  if (!description) {
+    throw new Error('PR Description is empty');
   }
+  return description.includes('- [x] Should generate code');
+}
 
-  if (!PR_NUMBER) {
-    throw new Error(
-      '`upsertGenerationComment` requires a `PR_NUMBER` environment variable.'
-    );
-  }
-
-  console.log(`Upserting comment for trigger: ${trigger}`);
-
+async function writeComment(trigger: Trigger, octokit: Octokit): Promise<void> {
   try {
     const baseOctokitConfig = {
       owner: OWNER,
@@ -99,6 +96,40 @@ export async function upsertGenerationComment(trigger: Trigger): Promise<void> {
     await octokit.rest.issues.createComment(baseOctokitConfig);
   } catch (e) {
     throw new Error(`Error with GitHub API: ${e}`);
+  }
+}
+
+/**
+ * Adds or updates a comment on a pull request.
+ */
+export async function upsertGenerationComment(trigger: Trigger): Promise<void> {
+  const octokit = getOctokit();
+  if (!trigger || allowedTriggers.includes(trigger) === false) {
+    throw new Error(
+      `'upsertGenerationComment' requires a 'trigger' parameter (${allowedTriggers.join(
+        ' | '
+      )}).`
+    );
+  }
+
+  if (!PR_NUMBER) {
+    throw new Error(
+      '`upsertGenerationComment` requires a `PR_NUMBER` environment variable.'
+    );
+  }
+
+  console.log(`Upserting comment for trigger: ${trigger}`);
+
+  const shouldHaveGenerated = await shouldHaveGeneratedCode(octokit);
+
+  if (trigger === 'noGen' && shouldHaveGenerated) {
+    writeComment('noGenButSHouldHave', octokit);
+    throw new Error('Expected code generation but no generated code was found');
+  } else if (trigger === 'codegen' && !shouldHaveGenerated) {
+    writeComment('genBuShouldNotHave', octokit);
+    throw new Error('No code generation was expected');
+  } else {
+    writeComment(trigger, octokit);
   }
 }
 
