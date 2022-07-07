@@ -2,6 +2,7 @@
   "name": "scripts",
   "version": "1.0.0",
   "scripts": {
+    "build:actions": "ncc build ci/clientgen/src/index.ts --source-map --transpile-only -o ci/clientgen/builddir",
     "cleanGeneratedBranch": "ts-node ci/codegen/cleanGeneratedBranch.ts",
     "createMatrix": "ts-node ci/githubActions/createMatrix.ts",
     "createReleasePR": "ts-node release/createReleasePR.ts",
@@ -24,6 +25,7 @@
     "@types/node": "18.16.18",
     "@types/semver": "7.5.0",
     "@types/spinnies": "0.5.0",
+    "@vercel/ncc": "0.36.1",
     "chalk": "4.1.2",
     "commander": "11.0.0",
     "dotenv": "16.3.1",

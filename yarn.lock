@@ -16,11 +16,11 @@ __metadata:
   linkType: hard
 
 "@actions/http-client@npm:^2.0.1":
-  version: 2.1.0
-  resolution: "@actions/http-client@npm:2.1.0"
+  version: 2.0.1
+  resolution: "@actions/http-client@npm:2.0.1"
   dependencies:
     tunnel: ^0.0.6
-  checksum: 25a72a952cc95fb4b3ab086da73a5754dd0957c206637cace69be2e16f018cc1b3d3c40d3bcf89ffd8a5929d5e8445594b498b50db306a50ad7536023f8e3800
+  checksum: 799ec3df91e28a9da91ce6592e94f8b8923ccf6cc21a2f72c7429be5af5273f1625335411adc2a1bb222d56c852d5767214dfa6fa32a6da7e81dba8290e08f17
   languageName: node
   linkType: hard
 
@@ -2748,6 +2748,17 @@ __metadata:
     "@typescript-eslint/types": 5.60.1
     eslint-visitor-keys: ^3.3.0
   checksum: 137f6a6f8efb398969087147b59f99f7d0deed044d89d7efce3631bb90bc32e3a13a5cee6a65e1c9830862c5c4402ac1a9b2c9e31fe46d1716602af2813bffae
+  languageName: node
+  linkType: hard
+
+"@vercel/ncc@npm:0.36.1":
+  version: 0.36.1
+  resolution: "@vercel/ncc@npm:0.36.1"
+  dependencies:
+    node-gyp: latest
+  bin:
+    ncc: dist/ncc/cli.js
+  checksum: dcb8db089b07a8fad64c24eef25be6bc2db7ba30582a03236e3a6d332c8653d93a45aba7fe0e01b6d64f3c5b54d23467539ac3664c113f54a9e59341ded79bf9
   languageName: node
   linkType: hard
 
@@ -7996,6 +8007,7 @@ __metadata:
     "@types/node": 18.16.18
     "@types/semver": 7.5.0
     "@types/spinnies": 0.5.0
+    "@vercel/ncc": 0.36.1
     chalk: 4.1.2
     commander: 11.0.0
     dotenv: 16.3.1
