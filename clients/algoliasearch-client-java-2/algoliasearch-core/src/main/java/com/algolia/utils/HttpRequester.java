@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
 import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -17,6 +19,8 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class HttpRequester implements Requester {
+
+  private static final Logger LOGGER = Logger.getLogger(HttpRequester.class.getName());
 
   private RetryStrategy retryStrategy;
   private OkHttpClient httpClient;
@@ -30,7 +34,8 @@ public class HttpRequester implements Requester {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     builder.addInterceptor(retryStrategy.getRetryInterceptor());
 
-    this.loggingInterceptor = new HttpLoggingInterceptor();
+    HttpLoggingInterceptor.Logger logger = LOGGER::fine;
+    this.loggingInterceptor = new HttpLoggingInterceptor(logger);
     loggingInterceptor.setLevel(LogLevel.NONE.value());
     builder.addInterceptor(this.loggingInterceptor);
 
