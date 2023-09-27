@@ -40,6 +40,9 @@ public class AlgoliaGoGenerator extends GoClientCodegen {
     supportingFiles.add(new SupportingFile("response.mustache", "", "response.go"));
     supportingFiles.add(new SupportingFile("utils.mustache", "", "utils.go"));
 
+    // Types
+    typeMapping.put("integer", "int");
+
     try {
       Utils.generateServer(client, additionalProperties);
       additionalProperties.put("packageVersion", Utils.getClientConfigField("go", "packageVersion"));
