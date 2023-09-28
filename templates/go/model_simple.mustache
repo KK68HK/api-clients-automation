@@ -86,143 +86,68 @@ func New{{classname}}WithDefaults() *{{classname}} {
 	return this
 }
 
-
-func (o {{classname}}) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o)
-}
-
 {{#isAdditionalPropertiesTrue}}
-func (r {{classname}}) MarshalJSON() ([]byte, error) {
-	type _{{classname}} {{classname}}
-	outBody, err := json.Marshal(_{{classname}}(r))
+func (o {{classname}}) MarshalJSON() ([]byte, error) {
+	type Alias {{classname}} // Create an alias to avoid infinite loop in MarshalJSON
+	alias := Alias(o)
+
+	if len(o.AdditionalProperties) == 0 {
+		return json.Marshal(alias)
+	}
+
+	objMap := make(map[string]interface{})
+	data, err := json.Marshal(alias)
 	if err != nil {
 		return nil, err
 	}
-	if r.AdditionalProperties == nil {
-		return outBody, nil
-	}
-
-	additionalProps, err := json.Marshal(r.AdditionalProperties)
+	err = json.Unmarshal(data, &objMap)
 	if err != nil {
 		return nil, err
 	}
-	if len(outBody) <= 2 { // skip empty object
-		return additionalProps, nil
+
+	// Merge with AdditionalProperties
+	for k, v := range o.AdditionalProperties {
+		objMap[k] = v
 	}
 
-	outBody[len(outBody)-1] = ','
-	additionalProps = additionalProps[1:]
-	return append(outBody, additionalProps...), nil
+	return json.Marshal(objMap)
 }
 
-func (o *{{{classname}}}) UnmarshalJSON(bytes []byte) (err error) {
-{{#parent}}
-{{^isMap}}
-	type {{classname}}WithoutEmbeddedStruct struct {
-	{{#vars}}
-	{{^-first}}
-	{{/-first}}
-	{{#description}}
-		// {{{.}}}
-	{{/description}}
-	{{#deprecated}}
-		// Deprecated
-	{{/deprecated}}
-		{{name}} {{^required}}{{^isNullable}}{{^isArray}}{{^isFreeFormObject}}*{{/isFreeFormObject}}{{/isArray}}{{/isNullable}}{{/required}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#withXml}} xml:"{{baseName}}{{#isXmlAttribute}},attr{{/isXmlAttribute}}"{{/withXml}}{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
-	{{/vars}}
-	}
-
-	var{{{classname}}}WithoutEmbeddedStruct := {{{classname}}}WithoutEmbeddedStruct{}
-
-	err = json.Unmarshal(bytes, &var{{{classname}}}WithoutEmbeddedStruct)
-	if err == nil {
-		var{{{classname}}} := _{{{classname}}}{}
-		{{#vars}}
-		var{{{classname}}}.{{{name}}} = var{{{classname}}}WithoutEmbeddedStruct.{{{name}}}
-		{{/vars}}
-		*o = {{{classname}}}(var{{{classname}}})
-	} else {
+func (o *{{classname}}) UnmarshalJSON(bytes []byte) error {
+	type Alias {{classname}} // Create an alias to avoid infinite loop in UnmarshalJSON
+	var alias Alias
+	if err := json.Unmarshal(bytes, &alias); err != nil {
 		return err
 	}
 
-	var{{{classname}}} := _{{{classname}}}{}
+	*o = {{classname}}(alias) // Convert alias to DictionaryEntry
 
-	err = json.Unmarshal(bytes, &var{{{classname}}})
-	if err == nil {
-		o.{{{parent}}} = var{{{classname}}}.{{{parent}}}
-	} else {
+	var objMap map[string]interface{}
+	err := json.Unmarshal(bytes, &objMap)
+	if err != nil {
 		return err
 	}
 
-	additionalProperties := make(map[string]any)
-
-	if err = json.Unmarshal(bytes, &additionalProperties); err == nil {
-		{{#vars}}
-		delete(additionalProperties, "{{{baseName}}}")
-		{{/vars}}
-
-		// remove fields from embedded structs
-		reflect{{{parent}}} := reflect.ValueOf(o.{{{parent}}})
-		for i := 0; i < reflect{{{parent}}}.Type().NumField(); i++ {
-			t := reflect{{{parent}}}.Type().Field(i)
-
-			if jsonTag := t.Tag.Get("json"); jsonTag != "" {
-				fieldName := ""
-				if commaIdx := strings.Index(jsonTag, ","); commaIdx > 0 {
-					fieldName = jsonTag[:commaIdx]
-				} else {
-					fieldName = jsonTag
-				}
-				if fieldName != "AdditionalProperties" {
-					delete(additionalProperties, fieldName)
-				}
+	// List of struct fields. Use this to check if a key in objMap is an additional property
+	structFields := []string{ {{#vars}}"{{{name}}}"{{^-last}}, {{/-last}}{{/vars}} }
+	stringInSlice := func(str string, list []string) bool {
+		for _, v := range list {
+			if v == str {
+				return true
 			}
 		}
-
-		o.AdditionalProperties = additionalProperties
+		return false
 	}
 
-	return err
-{{/isMap}}
-{{#isMap}}
-	var{{{classname}}} := _{{{classname}}}{}
-
-	if err = json.Unmarshal(bytes, &var{{{classname}}}); err == nil {
-		*o = {{{classname}}}(var{{{classname}}})
+	// Fill AdditionalProperties
+	o.AdditionalProperties = make(map[string]interface{})
+	for k, v := range objMap {
+		if !stringInSlice(k, structFields) {
+			o.AdditionalProperties[k] = v
+		}
 	}
-
-	additionalProperties := make(map[string]any)
-
-	if err = json.Unmarshal(bytes, &additionalProperties); err == nil {
-		{{#vars}}
-		delete(additionalProperties, "{{{baseName}}}")
-		{{/vars}}
-		o.AdditionalProperties = additionalProperties
-	}
-
-	return err
-{{/isMap}}
-{{/parent}}
-{{^parent}}
-	var{{{classname}}} := _{{{classname}}}{}
-
-	if err = json.Unmarshal(bytes, &var{{{classname}}}); err == nil {
-		*o = {{{classname}}}(var{{{classname}}})
-	}
-
-	additionalProperties := make(map[string]any)
-
-	if err = json.Unmarshal(bytes, &additionalProperties); err == nil {
-		{{#vars}}
-		delete(additionalProperties, "{{{baseName}}}")
-		{{/vars}}
-		o.AdditionalProperties = additionalProperties
-	}
-
-	return err
-{{/parent}}
+	return nil
 }
-
 {{/isAdditionalPropertiesTrue}}
 {{#isArray}}
 func (o *{{{classname}}}) UnmarshalJSON(bytes []byte) (err error) {
@@ -230,16 +155,4 @@ func (o *{{{classname}}}) UnmarshalJSON(bytes []byte) (err error) {
 }
 
 {{/isArray}}
-func (o {{classname}}) String() string {
-  out := ""
-	{{#vars}}
-  out += fmt.Sprintf("  {{baseName}}=%v\n", o.{{name}})
-	{{/vars}}
-	{{#isAdditionalPropertiesTrue}}
-	for key, value := range o.AdditionalProperties {
-		out += fmt.Sprintf("  %s=%v\n", key, value)
-	}
-	{{/isAdditionalPropertiesTrue}}
-  return fmt.Sprintf("{{classname}} {\n%s}", out)
-}
 {{>nullable_model}}
