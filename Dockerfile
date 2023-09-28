@@ -28,11 +28,14 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | b
 
 # Go
 COPY --from=go-builder /usr/local/go/ /usr/local/go/
-RUN echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
+RUN echo "export PATH=$PATH:/usr/local/go/bin:/root/go/bin" > ~/.profile \
+    && source ~/.profile \
+    && go install golang.org/x/tools/cmd/goimports@latest
 
 # Dart
 COPY --from=dart-builder /usr/lib/dart/ /usr/lib/dart/
-RUN echo "export PATH=/usr/lib/dart/bin:/root/.pub-cache/bin:$PATH" >>  ~/.profile && source ~/.profile \
+RUN echo "export PATH=/usr/lib/dart/bin:/root/.pub-cache/bin:$PATH" > ~/.profile \
+    && source ~/.profile \
     && dart pub global activate melos
 
 # PHP
@@ -40,7 +43,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Java
 COPY --from=java-builder /usr/local/openjdk-17 /usr/local/openjdk-17
-RUN echo "export PATH=$PATH:/usr/local/openjdk-17/bin" >> ~/.profile && source ~/.profile
+RUN echo "export PATH=$PATH:/usr/local/openjdk-17/bin" > ~/.profile && source ~/.profile
 ADD https://github.com/google/google-java-format/releases/download/v1.18.1/google-java-format-1.18.1-all-deps.jar /tmp/java-formatter.jar
 
 WORKDIR /app
