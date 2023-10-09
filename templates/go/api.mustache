@@ -212,7 +212,7 @@ func (c *APIClient) {{nickname}}WithContext(ctx context.Context, {{#hasParams}}r
 
   {{#vendorExtensions.x-is-custom-request}}
     {{#queryParams}}
-      {{^required}}if !isNilorEmpty(r.{{paramName}}) { {{/required}}
+      {{^required}}if !isNilOrEmpty(r.{{paramName}}) { {{/required}}
           for k, v := range r.{{paramName}} {
            queryParams.Set(k, parameterToString(v))
           }
@@ -225,7 +225,7 @@ func (c *APIClient) {{nickname}}WithContext(ctx context.Context, {{#hasParams}}r
 	queryParams.Set("{{baseName}}", parameterToString({{^isFreeFormObject}}{{^isArray}}{{^isPrimitiveType}}*{{/isPrimitiveType}}{{/isArray}}{{/isFreeFormObject}}r.{{paramName}}))
 	{{/required}}
   {{^required}}
-  if !isNilorEmpty(r.{{paramName}}) {
+  if !isNilOrEmpty(r.{{paramName}}) {
     queryParams.Set("{{baseName}}", parameterToString({{^isFreeFormObject}}{{^isArray}}{{^isPrimitiveType}}*{{/isPrimitiveType}}{{/isArray}}{{/isFreeFormObject}}r.{{paramName}}))
   }
   {{/required}}
@@ -236,7 +236,7 @@ func (c *APIClient) {{nickname}}WithContext(ctx context.Context, {{#hasParams}}r
 	headers["{{baseName}}"] = parameterToString({{^isFreeFormObject}}{{^isArray}}{{^isPrimitiveType}}*{{/isPrimitiveType}}{{/isArray}}{{/isFreeFormObject}}r.{{paramName}})
 	{{/required}}
   {{^required}}
-  if !isNilorEmpty(r.{{paramName}}) {
+  if !isNilOrEmpty(r.{{paramName}}) {
     headers["{{baseName}}"] = parameterToString({{^isFreeFormObject}}{{^isArray}}{{^isPrimitiveType}}*{{/isPrimitiveType}}{{/isArray}}{{/isFreeFormObject}}r.{{paramName}})
   }
   {{/required}}
@@ -254,7 +254,7 @@ func (c *APIClient) {{nickname}}WithContext(ctx context.Context, {{#hasParams}}r
 
 {{#bodyParams}}
   // body params{{^required}}
-  if isNilorEmpty(r.{{paramName}}) {
+  if isNilOrEmpty(r.{{paramName}}) {
     postBody = "{}"
   } else { {{/required}}
     postBody = r.{{paramName}}{{^required}}

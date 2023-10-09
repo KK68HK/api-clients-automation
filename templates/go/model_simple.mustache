@@ -17,7 +17,7 @@ type {{classname}} struct {
 {{#deprecated}}
 	// Deprecated
 {{/deprecated}}
-	{{name}} {{#isModel}}*{{/isModel}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{name}} {{#isModel}}*{{/isModel}}{{#isNullable}}*{{/isNullable}}{{{datatypeWithEnum}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 {{/vars}}
 {{#isAdditionalPropertiesTrue}}
 	AdditionalProperties map[string]any `json:",inline"`
@@ -33,7 +33,7 @@ type {{{classname}}}Option func(f *{{{classname}}})
 
 {{/hasOptional}}
 {{#optionalVars}}
-func With{{{classname}}}{{{name}}}(val {{#isModel}}*{{/isModel}}{{{dataType}}}) {{{classname}}}Option {
+func With{{{classname}}}{{{name}}}(val {{#isModel}}*{{/isModel}}{{#isNullable}}*{{/isNullable}}{{{datatypeWithEnum}}}) {{{classname}}}Option {
 	return func(f *{{{classname}}}) {
 		f.{{{name}}} = val
 	}
@@ -44,7 +44,7 @@ func With{{{classname}}}{{{name}}}(val {{#isModel}}*{{/isModel}}{{{dataType}}}) 
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func New{{classname}}({{#requiredVars}}{{nameInCamelCase}} {{#isModel}}*{{/isModel}}{{dataType}}{{^-last}}, {{/-last}}{{/requiredVars}}{{#hasOptional}}{{#requiredVars.0}}, {{/requiredVars.0}}opts ...{{{classname}}}Option{{/hasOptional}}) *{{classname}} {
+func New{{classname}}({{#requiredVars}}{{nameInCamelCase}} {{#isModel}}*{{/isModel}}{{#isNullable}}*{{/isNullable}}{{dataType}}{{^-last}}, {{/-last}}{{/requiredVars}}{{#hasOptional}}{{#requiredVars.0}}, {{/requiredVars.0}}opts ...{{{classname}}}Option{{/hasOptional}}) *{{classname}} {
 	this := &{{classname}}{}
 {{#allVars}}
 {{#required}}
@@ -155,4 +155,3 @@ func (o *{{{classname}}}) UnmarshalJSON(bytes []byte) (err error) {
 }
 
 {{/isArray}}
-{{>nullable_model}}
