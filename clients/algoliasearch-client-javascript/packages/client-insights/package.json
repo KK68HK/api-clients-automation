@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@algolia/client-common": "5.0.0-alpha.89",
-    "@algolia/requester-browser-xhr": "5.0.0-alpha.89",
+    "@algolia/requester-browser-xhr": "0.0.0",
     "@algolia/requester-node-http": "5.0.0-alpha.89"
   },
   "devDependencies": {
