@@ -62,9 +62,9 @@
   "dependencies": {
     "@algolia/client-abtesting": "5.0.0-alpha.88",
     "@algolia/client-analytics": "5.0.0-alpha.88",
-    "@algolia/client-common": "5.0.0-alpha.89",
+    "@algolia/client-common": "0.0.0",
     "@algolia/client-personalization": "5.0.0-alpha.88",
-    "@algolia/client-search": "5.0.0-alpha.88",
+    "@algolia/client-search": "0.0.0",
     "@algolia/requester-browser-xhr": "5.0.0-alpha.89",
     "@algolia/requester-node-http": "5.0.0-alpha.89"
   },
